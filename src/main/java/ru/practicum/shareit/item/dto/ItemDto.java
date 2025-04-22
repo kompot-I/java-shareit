@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,6 @@ public class ItemDto {
     private String name;
     @NotBlank(message = "An description cannot be empty.")
     private String description;
-    @NotBlank(message = "An available cannot be empty.")
+    @NotNull(message = "An available cannot be empty.")
     private Boolean available;
 }

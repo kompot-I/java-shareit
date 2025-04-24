@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
@@ -23,9 +22,6 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public User update(Long id, User entity) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("User with id " + id + " not found");
-        }
         User oldUser = users.get(id);
 
         if (entity.getEmail() != null && !entity.getEmail().isBlank()) {
@@ -39,18 +35,12 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public void remove(Long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("User with id " + id + " not found");
-        }
         users.remove(id);
     }
 
     @Override
-    public User getUser(Long userId) {
-        if (!users.containsKey(userId)) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
-        return users.get(userId);
+    public Optional<User> getUser(Long userId) {
+        return Optional.ofNullable(users.get(userId));
     }
 
     @Override

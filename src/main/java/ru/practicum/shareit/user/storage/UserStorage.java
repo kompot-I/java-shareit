@@ -12,7 +12,7 @@ public interface UserStorage {
 
     void remove(Long id);
 
-    User getUser(Long userId);
+    Optional<User> getUser(Long userId);
 
     Collection<User> getUsers();
 

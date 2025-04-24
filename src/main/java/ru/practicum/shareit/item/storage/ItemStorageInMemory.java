@@ -42,7 +42,7 @@ public class ItemStorageInMemory implements ItemStorage {
     }
 
     @Override
-    public Item getItem(Long userId, Long itemId) {
+    public Item getItemByUserId(Long userId, Long itemId) {
         if (!items.containsKey(itemId)) {
             throw new NotFoundException("Item with id " + itemId + " not found");
         }

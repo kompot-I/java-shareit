@@ -9,7 +9,7 @@ public interface ItemStorage {
 
     Item update(Long userId, Long itemId, Item item);
 
-    Item getItem(Long userId, Long itemId);
+    Item getItemByUserId(Long userId, Long itemId);
 
     Collection<Item> getItemsByUserId(Long userId);
 

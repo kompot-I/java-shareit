@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(Long id, UserDto entity) {
-        userStorage.getUser(id);
+        getUser(id);
         User incomingUser = UserMapper.toModel(entity);
         if (incomingUser.getEmail() != null && !incomingUser.getEmail().isBlank()) {
             checkDuplicateEmail(incomingUser.getEmail(), id);
@@ -39,12 +40,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void remove(Long id) {
+        getUser(id);
         userStorage.remove(id);
     }
 
     @Override
     public UserDto getUser(Long id) {
-        User user = userStorage.getUser(id);
+        User user = getUserById(id);
         return UserMapper.toDto(user);
     }
 
@@ -53,6 +55,11 @@ public class UserServiceImpl implements UserService {
         return userStorage.getUsers().stream()
                 .map(UserMapper::toDto)
                 .toList();
+    }
+
+    private User getUserById(Long userId) {
+        return userStorage.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
     }
 
     private void checkDuplicateEmail(String email, Long excludeId) {

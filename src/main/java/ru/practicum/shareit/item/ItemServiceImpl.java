@@ -2,10 +2,12 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
@@ -18,7 +20,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto entity) {
-        validateUserExists(userId);
+        getUser(userId);
         Item item = ItemMapper.toModel(entity);
         item.setOwner(userId);
         Item createdItem = itemStorage.create(item);
@@ -27,14 +29,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto entity) {
-        validateUserExists(userId);
-        Item item = itemStorage.update(userId, itemId, ItemMapper.toModel(entity));
-        return ItemMapper.toDto(item);
+        Item item = itemStorage.getItemByUserId(userId, itemId);
+        if (!item.getOwner().equals(userId)) {
+            throw new NotFoundException("User with id " + userId + " is not the owner of item with id " + itemId);
+        }
+
+        Item updated = itemStorage.update(userId, itemId, ItemMapper.toModel(entity));
+        return ItemMapper.toDto(updated);
     }
 
     @Override
     public ItemDto getItem(Long userId, Long itemId) {
-        Item item = itemStorage.getItem(userId, itemId);
+        Item item = itemStorage.getItemByUserId(userId, itemId);
         return ItemMapper.toDto(item);
     }
 
@@ -48,7 +54,8 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toDto(itemStorage.searchItemByText(userId, text));
     }
 
-    private void validateUserExists(Long userId) {
-        userStorage.getUser(userId);
+    private User getUser(Long userId) {
+        return userStorage.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
     }
 }

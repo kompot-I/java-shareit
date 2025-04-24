@@ -11,7 +11,7 @@ public interface UserService {
 
     void remove(Long id);
 
-    UserDto getItem(Long id);
+    UserDto getUser(Long id);
 
     Collection<UserDto> getItems();
 }

@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.storage;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserStorage {
     User create(User user);
@@ -11,7 +12,9 @@ public interface UserStorage {
 
     void remove(Long id);
 
-    User getItem(Long id);
+    User getUser(Long userId);
 
-    Collection<User> getItems();
+    Collection<User> getUsers();
+
+    Optional<User> findByEmail(String email);
 }

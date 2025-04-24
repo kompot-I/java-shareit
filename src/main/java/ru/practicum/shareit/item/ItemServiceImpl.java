@@ -18,14 +18,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto entity) {
-        userStorage.getItem(userId);
-        Item item = itemStorage.create(userId, ItemMapper.toModel(entity));
-        return ItemMapper.toDto(item);
+        validateUserExists(userId);
+        Item item = ItemMapper.toModel(entity);
+        item.setOwner(userId);
+        Item createdItem = itemStorage.create(item);
+        return ItemMapper.toDto(createdItem);
     }
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto entity) {
-        userStorage.getItem(userId);
+        validateUserExists(userId);
         Item item = itemStorage.update(userId, itemId, ItemMapper.toModel(entity));
         return ItemMapper.toDto(item);
     }
@@ -38,15 +40,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getItems(Long userId) {
-        return itemStorage.getItems(userId).stream()
-                .map(ItemMapper::toDto)
-                .toList();
+        return ItemMapper.toDto(itemStorage.getItemsByUserId(userId));
     }
 
     @Override
-    public Collection<ItemDto> getSearch(Long userId, String text) {
-        return itemStorage.getSearch(userId, text).stream()
-                .map(ItemMapper::toDto)
-                .toList();
+    public Collection<ItemDto> searchItems(Long userId, String text) {
+        return ItemMapper.toDto(itemStorage.searchItemByText(userId, text));
+    }
+
+    private void validateUserExists(Long userId) {
+        userStorage.getUser(userId);
     }
 }

@@ -14,9 +14,8 @@ public class ItemStorageInMemory implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
 
     @Override
-    public Item create(Long userId, Item entity) {
+    public Item create(Item entity) {
         entity.setId(getNextId());
-        entity.setOwner(userId);
         items.put(entity.getId(), entity);
         return entity;
     }
@@ -45,20 +44,20 @@ public class ItemStorageInMemory implements ItemStorage {
     @Override
     public Item getItem(Long userId, Long itemId) {
         if (!items.containsKey(itemId)) {
-            throw new NotFoundException("User with id " + itemId + " not found");
+            throw new NotFoundException("Item with id " + itemId + " not found");
         }
         return items.get(itemId);
     }
 
     @Override
-    public Collection<Item> getItems(Long userId) {
+    public Collection<Item> getItemsByUserId(Long userId) {
         return items.values().stream()
                 .filter(item -> item.getOwner().equals(userId))
                 .toList();
     }
 
     @Override
-    public Collection<Item> getSearch(Long userId, String text) {
+    public Collection<Item> searchItemByText(Long userId, String text) {
         if (text.isEmpty() || text.isBlank()) {
             return List.of();
         }

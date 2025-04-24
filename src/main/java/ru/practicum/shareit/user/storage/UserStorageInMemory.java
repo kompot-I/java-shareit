@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.DuplicateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
@@ -17,10 +16,6 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public User create(User entity) {
-        String email = entity.getEmail();
-        if (getItemByEmail(email).isPresent()) {
-            throw new DuplicateException("User with mail " + email + " already exist");
-        }
         entity.setId(getNextId());
         users.put(entity.getId(), entity);
         return entity;
@@ -32,16 +27,12 @@ public class UserStorageInMemory implements UserStorage {
             throw new NotFoundException("User with id " + id + " not found");
         }
         User oldUser = users.get(id);
-        String userEmail = entity.getEmail();
-        String userName = entity.getName();
-        if (userEmail != null && !userEmail.isBlank()) {
-            if (getItemByEmail(userEmail).isPresent()) {
-                throw new DuplicateException("User with mail " + userEmail + " already exist");
-            }
-            oldUser.setEmail(userEmail);
+
+        if (entity.getEmail() != null && !entity.getEmail().isBlank()) {
+            oldUser.setEmail(entity.getEmail());
         }
-        if (userName != null && !userName.isBlank()) {
-            oldUser.setName(userName);
+        if (entity.getName() != null && !entity.getName().isBlank()) {
+            oldUser.setName(entity.getName());
         }
         return oldUser;
     }
@@ -55,19 +46,20 @@ public class UserStorageInMemory implements UserStorage {
     }
 
     @Override
-    public User getItem(Long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("User with id " + id + " not found");
+    public User getUser(Long userId) {
+        if (!users.containsKey(userId)) {
+            throw new NotFoundException("User with id " + userId + " not found");
         }
-        return users.get(id);
+        return users.get(userId);
     }
 
     @Override
-    public Collection<User> getItems() {
+    public Collection<User> getUsers() {
         return users.values();
     }
 
-    private Optional<User> getItemByEmail(String email) {
+    @Override
+    public Optional<User> findByEmail(String email) {
         return users.values().stream()
                 .filter(user -> user.getEmail().equals(email))
                 .findFirst();

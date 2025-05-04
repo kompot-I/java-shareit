@@ -4,44 +4,47 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     @Override
     public UserDto create(UserDto entity) {
         User userModel = UserMapper.toModel(entity);
-        if (userStorage.findByEmail(userModel.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(userModel.getEmail()).isPresent()) {
             throw new DuplicateException("User with mail " + userModel.getEmail() + " already exist");
         }
-        User createdUser = userStorage.create(userModel);
+        User createdUser = userRepository.save(userModel);
         return UserMapper.toDto(createdUser);
     }
 
     @Override
     public UserDto update(Long id, UserDto entity) {
-        getUser(id);
-        User incomingUser = UserMapper.toModel(entity);
-        if (incomingUser.getEmail() != null && !incomingUser.getEmail().isBlank()) {
-            checkDuplicateEmail(incomingUser.getEmail(), id);
+        User user = getUserById(id);
+        if (entity.getName() != null)
+            user.setName(entity.getName());
+
+        if (entity.getEmail() != null && !entity.getEmail().isBlank()) {
+            checkDuplicateEmail(entity.getEmail(), id);
+            user.setEmail(entity.getEmail());
         }
 
-        User updatedUser = userStorage.update(id, incomingUser);
-        return UserMapper.toDto(updatedUser);
+        userRepository.save(user);
+        return UserMapper.toDto(user);
     }
 
     @Override
     public void remove(Long id) {
-        getUser(id);
-        userStorage.remove(id);
+        User user = getUserById(id);
+        userRepository.delete(user);
     }
 
     @Override
@@ -52,18 +55,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getItems() {
-        return userStorage.getUsers().stream()
+        return userRepository.findAll().stream()
                 .map(UserMapper::toDto)
                 .toList();
     }
 
     private User getUserById(Long userId) {
-        return userStorage.getUser(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
     }
 
     private void checkDuplicateEmail(String email, Long excludeId) {
-        userStorage.findByEmail(email)
+        userRepository.findByEmail(email)
                 .filter(user -> !user.getId().equals(excludeId))
                 .ifPresent(user -> {
                     throw new DuplicateException("User with mail " + email + " already exist");

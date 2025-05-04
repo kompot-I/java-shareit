@@ -4,13 +4,13 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.validators.DateRangeControl;
+import ru.practicum.shareit.booking.validators.DataRangeValidation;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@DateRangeControl
+@DataRangeValidation
 public class BookingRequestDto {
 
     @NotNull(message = "ID must be specified")

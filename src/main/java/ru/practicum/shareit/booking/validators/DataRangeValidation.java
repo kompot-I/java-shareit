@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = ValidatorDateRange.class)
-public @interface DateRangeControl {
+public @interface DataRangeValidation {
     String message() default "Incorrect date range detected";
 
     Class<?>[] groups() default {};
